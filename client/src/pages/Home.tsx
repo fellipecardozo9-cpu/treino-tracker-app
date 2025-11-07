@@ -3,6 +3,7 @@ import React from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+
 import { useWorkoutData } from '@/hooks/useWorkoutData';
 import { useSequentialWorkoutProgress } from '@/hooks/useSequentialWorkoutProgress';
 import { useAuth } from '@/contexts/AuthContext';
@@ -100,7 +101,7 @@ export default function Home() {
             return (
               <Card key={day} className="bg-slate-800 border-slate-700 p-6">
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-white capitalize">{data.workoutPrograms[0].dias[index].titulo}</h3>
+                  <h3 className="text-lg font-semibold text-white capitalize">{data?.workoutPrograms?.[0]?.dias?.[index]?.titulo || DAYS_LABEL[index]}</h3>
                   <p className="text-sm text-slate-400">
                     {day === currentDay.toLowerCase() ? `Dia atual - Semana ${currentWeek}` : `Semana ${currentWeek}`}
                   </p>
