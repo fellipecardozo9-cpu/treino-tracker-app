@@ -222,7 +222,7 @@ export default function WorkoutManager() {
             {activeWorkout.dias.map((day, dayIndex) => (
               <Card key={dayIndex} className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-lg">{day.dia}</h3>
+                  <h3 className="font-semibold text-lg">{day.titulo}</h3>
                   <Button
                     size="sm"
                     variant="outline"
