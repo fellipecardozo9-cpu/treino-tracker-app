@@ -243,7 +243,6 @@ export default function WorkoutManager() {
                       Nenhum exercício adicionado
                     </p>
                   ) : (
-                    // Linha 246
                     day.exercicios.map((exercise, exIndex) => (
                       editingExercise && editingExercise.dayIndex === dayIndex && editingExercise.exIndex === exIndex ? (
                         <Card className="p-3 space-y-2">
@@ -337,5 +336,87 @@ export default function WorkoutManager() {
                           </div>
                         </div>
                       )
-                    )) // <--- ESTE É O FECHAMENTO CORRETO
+                    ))
                   )}
+                </div>
+
+                {/* Adicionar Exercício */}
+                {selectedDayForEdit === day.dia && (
+                  <div className="space-y-2 pt-2 border-t">
+                    <p className="text-sm font-medium">Adicionar Exercício</p>
+                    <Select
+                      value={selectedExerciseGroup}
+                      onValueChange={setSelectedExerciseGroup}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione grupo muscular" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {groups.map((group) => (
+                          <SelectItem key={group} value={group}>
+                            {group}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {selectedExerciseGroup && (
+                      <div className="space-y-1">
+                        {getExercisesByGroup(selectedExerciseGroup).map(
+                          (exercise) => (
+                            <Button
+                              key={exercise.id}
+                              variant="outline"
+                              className="w-full justify-start"
+                              onClick={() => {
+                                handleAddExerciseToDay(dayIndex, exercise.id);
+                                setSelectedExerciseGroup('');
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              {exercise.nome}
+                            </Button>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Lista de Treinos */}
+        {store.workoutPrograms.length > 0 && (
+          <Card className="p-4">
+            <p className="font-semibold mb-3">Todos os Treinos</p>
+            <div className="space-y-2">
+              {store.workoutPrograms.map((program) => (
+                <div
+                  key={program.id}
+                  className="flex items-center justify-between p-2 bg-muted rounded"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium">{program.nome}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {program.dias.reduce((sum, day) => sum + day.exercicios.length, 0)} exercícios
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setActiveWorkout(program.id)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
