@@ -3,7 +3,6 @@ import React from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { UserProfileCard } from '@/components/UserProfileCard';
 import { useWorkoutData } from '@/hooks/useWorkoutData';
 import { useSequentialWorkoutProgress } from '@/hooks/useSequentialWorkoutProgress';
 import { useAuth } from '@/contexts/AuthContext';
@@ -82,11 +81,6 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Perfil do Usuário */}
-        <div className="mb-8">
-          <UserProfileCard />
-        </div>
-
         {/* Botão de Estatísticas */}
         <div className="mb-8">
           <Button
@@ -159,4 +153,3 @@ export default function Home() {
     </div>
   );
 }
-

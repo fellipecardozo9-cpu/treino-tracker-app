@@ -36,6 +36,7 @@ export default function WorkoutManager() {
   });
 
   const [selectedDayForEdit, setSelectedDayForEdit] = useState<string | null>(null);
+  const [editingExercise, setEditingExercise] = useState<{ dayIndex: number; exIndex: number } | null>(null);
   const [selectedExerciseGroup, setSelectedExerciseGroup] = useState<string>('');
 
   const activeWorkout = getActiveWorkout();
@@ -69,8 +70,8 @@ export default function WorkoutManager() {
     updatedDays[dayIndex].exercicios.push({
       exerciseId,
       nome: exercise.nome,
-      series: 4,
-      reps: '8-10',
+      series: 0, // Inicia com 0 para forçar a edição
+      reps: '', // Inicia vazio para forçar a edição
       observacao: '',
     });
 
@@ -243,27 +244,98 @@ export default function WorkoutManager() {
                     </p>
                   ) : (
                     day.exercicios.map((exercise, exIndex) => (
-                      <div
-                        key={exIndex}
-                        className="p-2 bg-muted rounded flex items-center justify-between"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{exercise.nome}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {exercise.series} x {exercise.reps}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            handleRemoveExerciseFromDay(dayIndex, exIndex)
-                          }
-                          className="h-8 w-8 p-0"
+                      {editingExercise && editingExercise.dayIndex === dayIndex && editingExercise.exIndex === exIndex ? (
+                        <Card className="p-3 space-y-2">
+                          <p className="font-medium">{exercise.nome}</p>
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              placeholder="Séries"
+                              value={exercise.series || ''}
+                              onChange={(e) =>
+                                handleUpdateExerciseInDay(
+                                  dayIndex,
+                                  exIndex,
+                                  'series',
+                                  parseInt(e.target.value) || 0
+                                )
+                              }
+                              className="w-1/3"
+                            />
+                            <Input
+                              type="text"
+                              placeholder="Repetições (ex: 8-12)"
+                              value={exercise.reps}
+                              onChange={(e) =>
+                                handleUpdateExerciseInDay(
+                                  dayIndex,
+                                  exIndex,
+                                  'reps',
+                                  e.target.value
+                                )
+                              }
+                              className="w-2/3"
+                            />
+                          </div>
+                          <Input
+                            type="text"
+                            placeholder="Observação (ex: Foco na excêntrica)"
+                            value={exercise.observacao}
+                            onChange={(e) =>
+                              handleUpdateExerciseInDay(
+                                dayIndex,
+                                exIndex,
+                                'observacao',
+                                e.target.value
+                              )
+                            }
+                          />
+                          <Button
+                            size="sm"
+                            className="w-full"
+                            onClick={() => setEditingExercise(null)}
+                          >
+                            <Check className="w-4 h-4 mr-2" /> Salvar
+                          </Button>
+                        </Card>
+                      ) : (
+                        <div
+                          key={exIndex}
+                          className="p-2 bg-muted rounded flex items-center justify-between"
                         >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{exercise.nome}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {exercise.series} x {exercise.reps}
+                            </p>
+                            {exercise.observacao && (
+                              <p className="text-xs text-muted-foreground italic">
+                                {exercise.observacao}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditingExercise({ dayIndex, exIndex })}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleRemoveExerciseFromDay(dayIndex, exIndex)
+                              }
+                              className="h-8 w-8 p-0"
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     ))
                   )}
                 </div>
@@ -348,4 +420,3 @@ export default function WorkoutManager() {
     </div>
   );
 }
-

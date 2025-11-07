@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { useWorkoutStorage } from '@/hooks/useWorkoutStorage';
 import { useWorkoutData } from '@/hooks/useWorkoutData';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { UserProfileCard } from '@/components/UserProfileCard';
 import { ArrowLeft, TrendingUp, Zap, ChevronRight, TrendingDown } from 'lucide-react';
 
 export default function Statistics() {
@@ -108,6 +109,8 @@ export default function Statistics() {
 
       {/* Conteúdo */}
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Perfil do Usuário */}
+        <UserProfileCard />
         {stats.totalWorkouts === 0 ? (
           <Card className="p-8 text-center">
             <Zap className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
@@ -275,4 +278,3 @@ export default function Statistics() {
     </div>
   );
 }
-
