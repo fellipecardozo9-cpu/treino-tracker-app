@@ -1,0 +1,55 @@
+{
+  "name": "Everstrong - Rastreador de Treinos",
+  "short_name": "Everstrong",
+  "description": "Aplicativo para acompanhar e confirmar a execução de treinos físicos com gráficos de evolução",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1a1a2e",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/everstrong-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/everstrong-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/everstrong-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/everstrong-logo.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["health", "fitness"],
+  "shortcuts": [
+    {
+      "name": "Iniciar Treino",
+      "short_name": "Treino",
+      "description": "Comece seu treino do dia",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/everstrong-logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
+

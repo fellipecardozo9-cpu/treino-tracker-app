@@ -1,0 +1,248 @@
+{
+  "nome_treino": "TREINO AVANÇADO – FASE 2 (8 SEMANAS)",
+  "estrutura_semanal": [
+    {
+      "dia": "Segunda",
+      "grupo_muscular": "Peito + Ombros frontal",
+      "observacoes": "Foco em força e densidade"
+    },
+    {
+      "dia": "Terça",
+      "grupo_muscular": "Costas + Abdômen",
+      "observacoes": "Foco em largura e espessura"
+    },
+    {
+      "dia": "Quarta",
+      "grupo_muscular": "Pernas completas",
+      "observacoes": "Intensidade e tempo sob tensão"
+    },
+    {
+      "dia": "Quinta",
+      "grupo_muscular": "Ombros lateral + posterior + trapézio",
+      "observacoes": "Definição e postura"
+    },
+    {
+      "dia": "Sexta",
+      "grupo_muscular": "Bíceps + Tríceps",
+      "observacoes": "Técnicas avançadas e super séries"
+    }
+  ],
+  "dias_de_treino": [
+    {
+      "dia": "Segunda",
+      "titulo": "Peito + Ombros frontal",
+      "exercicios": [
+        {
+          "nome": "Supino Reto com Barra",
+          "series": 5,
+          "reps": "6–8",
+          "observacao": "1ª série leve de aquecimento"
+        },
+        {
+          "nome": "Supino Inclinado com Halteres",
+          "series": 4,
+          "reps": "8–10",
+          "observacao": "Foco na descida lenta"
+        },
+        {
+          "nome": "Crucifixo Inclinado",
+          "series": 3,
+          "reps": "12",
+          "observacao": "Bi-set com supino reto máquina"
+        },
+        {
+          "nome": "Supino Máquina / Smith",
+          "series": 3,
+          "reps": "10",
+          "observacao": "Faça junto ao crucifixo (bi-set)"
+        },
+        {
+          "nome": "Desenvolvimento com Halteres",
+          "series": 4,
+          "reps": "8–10",
+          "observacao": "Foco frontal"
+        },
+        {
+          "nome": "Elevação Frontal (corda/halteres)",
+          "series": 3,
+          "reps": "12",
+          "observacao": "Descanso curto 45s"
+        }
+      ]
+    },
+    {
+      "dia": "Terça",
+      "titulo": "Costas + Abdômen",
+      "exercicios": [
+        {
+          "nome": "Barra fixa / Puxada aberta",
+          "series": 4,
+          "reps": "6–10",
+          "observacao": "Até falha técnica"
+        },
+        {
+          "nome": "Remada Curvada (barra)",
+          "series": 4,
+          "reps": "8–10",
+          "observacao": "Explosiva na subida"
+        },
+        {
+          "nome": "Remada Baixa (triângulo)",
+          "series": 4,
+          "reps": "10–12",
+          "observacao": "Foco em amplitude"
+        },
+        {
+          "nome": "Puxada Neutra / Unilateral",
+          "series": 3,
+          "reps": "12",
+          "observacao": "Alternar braços"
+        },
+        {
+          "nome": "Pullover (cabo ou halter)",
+          "series": 3,
+          "reps": "15",
+          "observacao": "Alongamento total"
+        },
+        {
+          "nome": "Prancha c/ peso",
+          "series": 3,
+          "reps": "45s",
+          "observacao": "—"
+        },
+        {
+          "nome": "Abdominal infra na barra",
+          "series": 3,
+          "reps": "15",
+          "observacao": "—"
+        }
+      ]
+    },
+    {
+      "dia": "Quarta",
+      "titulo": "Pernas completas",
+      "exercicios": [
+        {
+          "nome": "Agachamento Livre / Smith",
+          "series": 5,
+          "reps": "6–8",
+          "observacao": "Pesado, técnica perfeita"
+        },
+        {
+          "nome": "Leg Press 45°",
+          "series": 4,
+          "reps": "10",
+          "observacao": "Última série drop set"
+        },
+        {
+          "nome": "Cadeira Extensora",
+          "series": 4,
+          "reps": "12–15",
+          "observacao": "Rest-pause última série"
+        },
+        {
+          "nome": "Mesa Flexora",
+          "series": 4,
+          "reps": "10–12",
+          "observacao": "Fase excêntrica lenta"
+        },
+        {
+          "nome": "Stiff com Halteres",
+          "series": 3,
+          "reps": "10",
+          "observacao": "—"
+        },
+        {
+          "nome": "Panturrilha Sentado",
+          "series": 4,
+          "reps": "15–20",
+          "observacao": "Segurar 2s no topo"
+        },
+        {
+          "nome": "Panturrilha em pé",
+          "series": 3,
+          "reps": "até falha",
+          "observacao": "—"
+        }
+      ]
+    },
+    {
+      "dia": "Quinta",
+      "titulo": "Ombros lateral + posterior + trapézio",
+      "exercicios": [
+        {
+          "nome": "Elevação Lateral",
+          "series": 4,
+          "reps": "12",
+          "observacao": "Última série drop set"
+        },
+        {
+          "nome": "Crucifixo inverso (posterior)",
+          "series": 4,
+          "reps": "12–15",
+          "observacao": "Movimento lento"
+        },
+        {
+          "nome": "Desenvolvimento Máquina (neutro)",
+          "series": 3,
+          "reps": "8–10",
+          "observacao": "—"
+        },
+        {
+          "nome": "Encolhimento com halteres",
+          "series": 4,
+          "reps": "12",
+          "observacao": "Contração máxima"
+        },
+        {
+          "nome": "Face Pull (cabo)",
+          "series": 3,
+          "reps": "15",
+          "observacao": "Técnica e controle"
+        }
+      ]
+    },
+    {
+      "dia": "Sexta",
+      "titulo": "Bíceps + Tríceps pesado",
+      "exercicios": [
+        {
+          "nome": "Rosca Direta Barra W",
+          "series": 4,
+          "reps": "8",
+          "observacao": "Rest-pause na última"
+        },
+        {
+          "nome": "Rosca Alternada",
+          "series": 3,
+          "reps": "10",
+          "observacao": "Bi-set com martelo"
+        },
+        {
+          "nome": "Rosca Martelo",
+          "series": 3,
+          "reps": "12",
+          "observacao": "Junto com alternada"
+        },
+        {
+          "nome": "Tríceps Testa (Barra W)",
+          "series": 4,
+          "reps": "8",
+          "observacao": "Excêntrica lenta"
+        },
+        {
+          "nome": "Tríceps Francês (halter único)",
+          "series": 3,
+          "reps": "10",
+          "observacao": "Bi-set com corda"
+        },
+        {
+          "nome": "Tríceps Corda",
+          "series": 3,
+          "reps": "12–15",
+          "observacao": "Drop set final"
+        }
+      ]
+    }
+  ]
+}
