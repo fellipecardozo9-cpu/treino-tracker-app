@@ -243,6 +243,7 @@ export default function WorkoutManager() {
                       Nenhum exercício adicionado
                     </p>
                   ) : (
+                    // Linha 246
                     day.exercicios.map((exercise, exIndex) => (
                       editingExercise && editingExercise.dayIndex === dayIndex && editingExercise.exIndex === exIndex ? (
                         <Card className="p-3 space-y-2">
@@ -336,6 +337,5 @@ export default function WorkoutManager() {
                           </div>
                         </div>
                       )
-                    ))
+                    )) // <--- ESTE É O FECHAMENTO CORRETO
                   )}
-
