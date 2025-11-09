@@ -13,8 +13,9 @@ import ExerciseDetail from "./pages/ExerciseDetail";
 import ExerciseManager from "./pages/ExerciseManager";
 import WorkoutManager from "./pages/WorkoutManager";
 import MasterAdminDashboard from "./pages/MasterAdminDashboard";
-import PersonalTrainerDashboard from "./pages/PersonalTrainerDashboard";
 import WorkoutTracking from "./pages/WorkoutTracking";
+import PersonalTrainerDashboard from "./pages/PersonalTrainerDashboard";
+import AssignWorkout from "./pages/AssignWorkout"; // <-- NOVO IMPORT
 
 function ProtectedRoute({ component: Component, requiredRole }: { component: React.ComponentType<any>, requiredRole?: 'master' | 'personal' | 'aluno' }) {
   const [, navigate] = useLocation();
@@ -62,6 +63,10 @@ function Router() {
       <Route path={"/login"} component={Login} />
       <Route path={"/master/dashboard"} component={() => <ProtectedRoute component={MasterAdminDashboard} requiredRole="master" />} />
       <Route path={"/personal/dashboard"} component={() => <ProtectedRoute component={PersonalTrainerDashboard} requiredRole="personal" />} />
+      {/* Rota para atribuição de treino */}
+      <Route path={"/personal/assign-workout/:studentId"} component={(props: any) => (
+        <ProtectedRoute component={() => <AssignWorkout studentId={props.params.studentId} />} requiredRole="personal" />
+      )} />
       <Route path={"/"} component={() => <ProtectedRoute component={Home} />} />
       <Route path={"/workout/:day/:week"} component={(props: any) => (
         <ProtectedRoute component={() => <WorkoutDay day={props.params.day} week={parseInt(props.params.week)} />} />

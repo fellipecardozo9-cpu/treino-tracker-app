@@ -1,56 +1,91 @@
-import { useState } from 'react';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-
-import { useWorkoutData } from '@/hooks/useWorkoutData';
-import { useSequentialWorkoutProgress } from '@/hooks/useSequentialWorkoutProgress';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Settings, BarChart3 } from 'lucide-react';
-
-const DAYS = ['segunda', 'terça', 'quarta', 'quinta', 'sexta'];
-const DAYS_LABEL = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+import { LogOut, BarChart3, Play, Edit2, User as UserIcon } from 'lucide-react';
 
 export default function Home() {
-  const [, navigate] = useLocation();
-  const { data, loading } = useWorkoutData();
-  const { isDayUnlocked, getCurrentWeek, getCurrentDay, isWorkoutCompleted } = useSequentialWorkoutProgress();
   const { user, logout } = useAuth();
+  const [, navigate] = useLocation();
+  const [assignedWorkout, setAssignedWorkout] = useState<any>(null);
+
+  useEffect(() => {
+    if (user?.role === 'master') {
+      navigate('/master/dashboard');
+      return;
+    } else if (user?.role === 'personal') {
+      navigate('/personal/dashboard');
+      return;
+    }
+
+    // Lógica para Aluno
+    if (user?.role === 'aluno') {
+      const workouts = JSON.parse(localStorage.getItem('assigned_workouts') || '[]');
+      const currentWorkout = workouts.find((w: any) => w.aluno_id === user.id);
+      setAssignedWorkout(currentWorkout);
+    }
+  }, [user, navigate]);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleWeekClick = (day: string, week: number) => {
-    navigate(`/workout/${day}/${week}`);
+  const handleStartWorkout = () => {
+    // Por enquanto, apenas um alerta. A lógica de rastreamento será implementada depois.
+    alert('Funcionalidade de iniciar treino em desenvolvimento.');
   };
 
-  // Redirecionamento para Dashboards de gestão
-  if (user?.role === 'master') {
-    navigate('/master/dashboard');
-    return null;
-  }
-  if (user?.role === 'personal') {
-    navigate('/personal/dashboard');
-    return null;
-  }
+  const renderWorkout = () => {
+    if (!assignedWorkout || assignedWorkout.treino.length === 0) {
+      return (
+        <Card className="p-6 bg-slate-800 text-white text-center">
+          <p className="text-xl font-semibold mb-2">Nenhum treino atribuído.</p>
+          <p className="text-slate-400">Seu Personal Trainer ainda não montou seu treino. Entre em contato!</p>
+        </Card>
+      );
+    }
 
-  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Carregando...</p>
-      </div>
-    );
-  }
+      <Card className="p-6 bg-slate-800 space-y-4">
+        <div className="flex justify-between items-center border-b border-slate-700 pb-2">
+          <h2 className="text-2xl font-bold text-white">Seu Treino Atual</h2>
+          <Button onClick={handleStartWorkout} className="bg-green-600 hover:bg-green-700">
+            <Play className="w-4 h-4 mr-2" /> Iniciar Treino
+          </Button>
+        </div>
 
-  const currentWeek = getCurrentWeek();
-  const currentDay = getCurrentDay();
-  const workoutCompleted = isWorkoutCompleted(); // Forçar novo hash para cache
+        <p className="text-sm text-slate-400">Atribuído em: {new Date(assignedWorkout.data_atribuicao).toLocaleDateString()}</p>
+
+        <div className="space-y-3">
+          {assignedWorkout.treino.map((ex: any, index: number) => (
+            <div key={index} className="p-3 bg-slate-700 rounded-md flex justify-between items-center">
+              <div>
+                <p className="font-semibold text-lg">{index + 1}. {ex.nome}</p>
+                <p className="text-sm text-slate-400">
+                  {ex.series} Séries de {ex.repeticoes} ({ex.carga})
+                </p>
+                {ex.observacoes && (
+                  <p className="text-xs text-yellow-400 mt-1">Obs: {ex.observacoes}</p>
+                )}
+              </div>
+              <Button variant="ghost" size="sm" className="text-blue-400 hover:bg-slate-600">
+                <Edit2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
+  };
+
+  if (user?.role !== 'aluno') {
+    return null; // Redirecionamento já tratado no useEffect
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-slate-900 text-white p-8">
       {/* Header */}
       <div className="bg-black/50 backdrop-blur-sm border-b border-slate-700 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -66,7 +101,7 @@ export default function Home() {
               className="text-white hover:bg-slate-700"
               title="Gerenciar treinos"
             >
-              <Settings className="w-4 h-4" />
+              {/* Removido Settings, pois o aluno não deve gerenciar treinos */}
             </Button>
             <Button
               variant="ghost"
@@ -85,11 +120,7 @@ export default function Home() {
         {/* Welcome */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">Bem-vindo, {user?.email?.split('@')[0] || 'Usuário'}</h2>
-          <p className="text-slate-400">
-            {workoutCompleted
-              ? '🎉 Parabéns! Você completou todas as 8 semanas!'
-              : `Progresso: ${currentDay} - Semana ${currentWeek}/8`}
-          </p>
+          <p className="text-slate-400">Seu treino personalizado está pronto!</p>
         </div>
 
         {/* Botão de Estatísticas */}
@@ -99,67 +130,11 @@ export default function Home() {
             className="w-full gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
           >
             <BarChart3 className="w-4 h-4" />
-            Ver Estatísticas Completas
+            Meu Perfil e Estatísticas
           </Button>
         </div>
 
-        {/* Days Grid */}
-        <div className="grid grid-cols-1 gap-6">
-          {DAYS.map((day, index) => {
-            const dayLabel = DAYS_LABEL[index];
-
-            return (
-              <Card key={day} className="bg-slate-800 border-slate-700 p-6">
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-white capitalize">{data?.workoutPrograms?.[0]?.dias?.[index]?.titulo || DAYS_LABEL[index]}</h3>
-                  <p className="text-sm text-slate-400">
-                    {day === currentDay.toLowerCase() ? `Dia atual - Semana ${currentWeek}` : `Semana ${currentWeek}`}
-                  </p>
-                </div>
-
-                {/* Week Buttons */}
-                <div className="grid grid-cols-4 gap-2">
-                  {Array.from({ length: 8 }, (_, i) => i + 1).map((week) => {
-                    const isUnlocked = isDayUnlocked(dayLabel, week);
-                    const isCurrent = dayLabel === currentDay && week === currentWeek;
-
-                    return (
-                      <button
-                        key={week}
-                        onClick={() => isUnlocked && handleWeekClick(dayLabel, week)}
-                        disabled={!isUnlocked}
-                        className={`
-                          py-3 px-2 rounded-lg font-semibold text-sm transition-all
-                          ${!isUnlocked
-                            ? 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
-                            : isCurrent
-                            ? 'bg-blue-600 text-white hover:bg-blue-700 ring-2 ring-blue-400'
-                            : 'bg-slate-700 text-white hover:bg-slate-600'
-                          }
-                        `}
-                      >
-                        {week}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Status */}
-                <div className="mt-4 pt-4 border-t border-slate-700">
-                  {dayLabel === currentDay && dayLabel === 'Sexta' && currentWeek === 8 ? (
-                    <p className="text-green-400 text-sm font-semibold">✓ Última semana - Sexta 8/8</p>
-                  ) : dayLabel === currentDay ? (
-                    <p className="text-blue-400 text-sm font-semibold">→ Próximo treino</p>
-                  ) : (
-                    <p className="text-slate-400 text-sm">
-                      {isDayUnlocked(dayLabel, currentWeek) ? 'Liberado' : 'Bloqueado'}
-                    </p>
-                  )}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+        {renderWorkout()}
       </div>
     </div>
   );

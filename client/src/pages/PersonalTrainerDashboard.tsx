@@ -157,7 +157,12 @@ export default function PersonalTrainerDashboard() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="ghost" size="sm" className="text-blue-400 hover:bg-slate-600">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-blue-400 hover:bg-slate-600"
+                onClick={() => navigate(`/personal/assign-workout/${s.user_id}`)}
+              >
                 <Edit2 className="w-4 h-4 mr-1" /> Gerenciar Treino
               </Button>
             </div>
