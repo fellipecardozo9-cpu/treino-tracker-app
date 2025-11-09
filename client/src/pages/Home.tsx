@@ -27,14 +27,6 @@ export default function Home() {
     navigate(`/workout/${day}/${week}`);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Carregando...</p>
-      </div>
-    );
-  }
-
   // Redirecionamento para Dashboards de gestão
   if (user?.role === 'master') {
     navigate('/master/dashboard');
@@ -43,6 +35,14 @@ export default function Home() {
   if (user?.role === 'personal') {
     navigate('/personal/dashboard');
     return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Carregando...</p>
+      </div>
+    );
   }
 
   const currentWeek = getCurrentWeek();
