@@ -12,15 +12,38 @@ import Statistics from "./pages/Statistics";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import ExerciseManager from "./pages/ExerciseManager";
 import WorkoutManager from "./pages/WorkoutManager";
+import MasterAdminDashboard from "./pages/MasterAdminDashboard";
+import PersonalTrainerDashboard from "./pages/PersonalTrainerDashboard";
+import WorkoutTracking from "./pages/WorkoutTracking";
 
-function ProtectedRoute({ component: Component }: { component: React.ComponentType<any> }) {
+function ProtectedRoute({ component: Component, requiredRole }: { component: React.ComponentType<any>, requiredRole?: 'master' | 'personal' | 'aluno' }) {
   const [, navigate] = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Carregando...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    navigate('/login');
+    return null;
+  }
+
+  if (requiredRole && user?.role !== requiredRole) {
+    // Redireciona para a home se a role não for a requerida
+    navigate('/');
+    return null;
+  }
+
+  if (user?.role === 'personal' && user?.status === 'pendente') {
+    // Tela de aguardando aprovação para Personal Trainer
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-yellow-500">Aguardando aprovação do Master Admin...</p>
       </div>
     );
   }
@@ -37,9 +60,14 @@ function Router() {
   return (
     <Switch>
       <Route path={"/login"} component={Login} />
+      <Route path={"/master/dashboard"} component={() => <ProtectedRoute component={MasterAdminDashboard} requiredRole="master" />} />
+      <Route path={"/personal/dashboard"} component={() => <ProtectedRoute component={PersonalTrainerDashboard} requiredRole="personal" />} />
       <Route path={"/"} component={() => <ProtectedRoute component={Home} />} />
       <Route path={"/workout/:day/:week"} component={(props: any) => (
         <ProtectedRoute component={() => <WorkoutDay day={props.params.day} week={parseInt(props.params.week)} />} />
+      )} />
+      <Route path={"/track/:workoutId"} component={(props: any) => (
+        <ProtectedRoute component={() => <WorkoutTracking workoutId={props.params.workoutId} />} />
       )} />
       <Route path={"/workout/:dayIndex"} component={(props: any) => (
         <ProtectedRoute component={() => <WorkoutDay dayIndex={parseInt(props.params.dayIndex)} />} />

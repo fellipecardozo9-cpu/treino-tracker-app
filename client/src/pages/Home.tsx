@@ -35,6 +35,16 @@ export default function Home() {
     );
   }
 
+  // Redirecionamento para Dashboards de gestão
+  if (user?.role === 'master') {
+    navigate('/master/dashboard');
+    return null;
+  }
+  if (user?.role === 'personal') {
+    navigate('/personal/dashboard');
+    return null;
+  }
+
   const currentWeek = getCurrentWeek();
   const currentDay = getCurrentDay();
   const workoutCompleted = isWorkoutCompleted(); // Forçar novo hash para cache

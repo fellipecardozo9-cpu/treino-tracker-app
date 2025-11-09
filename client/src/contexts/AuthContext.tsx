@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthContextType, UserRole } from '@/types/auth';
+import { User, AuthContextType, UserRole, UserStatus } from '@/types/auth';
+import { PersonalProfile, StudentProfile } from '@/types/app';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -7,27 +8,30 @@ const AUTH_STORAGE_KEY = 'auth_user';
 const USERS_STORAGE_KEY = 'auth_users';
 
 // Usuários padrão
-const DEFAULT_ADMIN: User = {
+const DEFAULT_MASTER: User = {
   id: 'admin-master',
-  nome: 'Admin Master',
+  // nome: 'Admin Master', // Removido do User
   email: 'admin@everstrong.com',
-  role: 'admin',
+  role: 'master',
+  status: 'ativo',
   createdAt: new Date().toISOString(),
 };
 
-const DEFAULT_PERSONAL: User = {
+const DEFAULT_PERSONAL_USER: User = {
   id: 'personal-1',
-  nome: 'Personal Trainer',
+  // nome: 'Personal Trainer', // Removido do User
   email: 'personal@everstrong.com',
   role: 'personal',
+  status: 'ativo',
   createdAt: new Date().toISOString(),
 };
 
-const DEFAULT_ALUNO: User = {
+const DEFAULT_ALUNO_USER: User = {
   id: 'aluno-1',
-  nome: 'Aluno',
+  // nome: 'Aluno', // Removido do User
   email: 'aluno@everstrong.com',
   role: 'aluno',
+  status: 'ativo',
   createdAt: new Date().toISOString(),
 };
 
@@ -52,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const users = localStorage.getItem(USERS_STORAGE_KEY);
     if (!users) {
-      const defaultUsers = [DEFAULT_ADMIN, DEFAULT_PERSONAL, DEFAULT_ALUNO];
+      const defaultUsers = [DEFAULT_MASTER, DEFAULT_PERSONAL_USER, DEFAULT_ALUNO_USER];
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(defaultUsers));
     }
   }, []);
@@ -86,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
-  const register = async (nome: string, email: string, password: string, role: UserRole) => {
+  const register = async (email: string, password: string, role: UserRole, profileData: PersonalProfile | StudentProfile) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -97,12 +101,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const newUser: User = {
+        status: role === 'personal' ? 'pendente' : 'ativo', // Personal começa pendente
         id: Date.now().toString(),
-        nome,
+        // nome, // Removido do User
         email,
         role,
         createdAt: new Date().toISOString(),
       };
+
+      // Simulação de armazenamento de perfis
+      const PROFILES_STORAGE_KEY = role === 'personal' ? 'personal_profiles' : 'student_profiles';
+      const profiles = JSON.parse(localStorage.getItem(PROFILES_STORAGE_KEY) || '[]');
+      profiles.push({ ...profileData, user_id: newUser.id });
+      localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(profiles));
 
       users.push(newUser);
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
@@ -133,4 +144,3 @@ export function useAuth() {
   }
   return context;
 }
-
