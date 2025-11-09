@@ -130,6 +130,31 @@ export default function PersonalTrainerDashboard() {
     alert(`Aluno ${manualStudentData.nome} cadastrado com sucesso!`);
   };
 
+  const handleDeleteStudent = (studentId: string, studentName: string) => {
+    if (!window.confirm(`Tem certeza que deseja excluir o aluno ${studentName}? Esta ação é irreversível.`)) {
+      return;
+    }
+
+    // 1. Remover do student_profiles
+    let studentProfiles = JSON.parse(localStorage.getItem('student_profiles') || '[]');
+    studentProfiles = studentProfiles.filter((s: any) => s.user_id !== studentId);
+    localStorage.setItem('student_profiles', JSON.stringify(studentProfiles));
+
+    // 2. Remover do auth_users
+    let authUsers = JSON.parse(localStorage.getItem('auth_users') || '[]');
+    authUsers = authUsers.filter((u: any) => u.id !== studentId);
+    localStorage.setItem('auth_users', JSON.stringify(authUsers));
+
+    // 3. Remover assigned_workouts (opcional, mas recomendado)
+    let assignedWorkouts = JSON.parse(localStorage.getItem('assigned_workouts') || '[]');
+    assignedWorkouts = assignedWorkouts.filter((w: any) => w.aluno_id !== studentId);
+    localStorage.setItem('assigned_workouts', JSON.stringify(assignedWorkouts));
+
+    // 4. Atualizar a lista na tela
+    loadData();
+    alert(`Aluno ${studentName} excluído com sucesso.`);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -164,6 +189,14 @@ export default function PersonalTrainerDashboard() {
                 onClick={() => navigate(`/personal/assign-workout/${s.user_id}`)}
               >
                 <Edit2 className="w-4 h-4 mr-1" /> Gerenciar Treino
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-red-400 hover:bg-red-900"
+                onClick={() => handleDeleteStudent(s.user_id, s.nome)}
+              >
+                <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           </Card>

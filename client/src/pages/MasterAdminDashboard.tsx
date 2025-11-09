@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Clock, Trash2, Edit2, Plus, LogOut } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 // Simulação de funções de gestão
 const getPendingPersonal = (): User[] => {
@@ -30,29 +32,25 @@ const updatePersonalStatus = (userId: string, status: UserStatus) => {
 };
 
 const getExercises = () => {
-  return JSON.parse(localStorage.getItem('exercises') || '[]');
+  // Agora usa a chave master_exercises
+  return JSON.parse(localStorage.getItem('master_exercises') || '[]');
 };
 
 const saveExercises = (exercises: any) => {
-  localStorage.setItem('exercises', JSON.stringify(exercises));
+  localStorage.setItem('master_exercises', JSON.stringify(exercises));
 };
-
-const initialExercises = [
-  { id: 'ex1', nome_exercicio: 'Supino Reto', grupo_muscular: 'Peito', link_video: 'link1', descricao: 'Descrição 1' },
-  { id: 'ex2', nome_exercicio: 'Agachamento Livre', grupo_muscular: 'Pernas', link_video: 'link2', descricao: 'Descrição 2' },
-  { id: 'ex3', nome_exercicio: 'Remada Curvada', grupo_muscular: 'Costas', link_video: 'link3', descricao: 'Descrição 3' },
-];
-
-if (!localStorage.getItem('exercises')) {
-  localStorage.setItem('exercises', JSON.stringify(initialExercises));
-}
 
 export default function MasterAdminDashboard() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const [pendingPersonal, setPendingPersonal] = useState<User[]>([]);
   const [exercises, setExercises] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('personal'); // Inicia na aba de gestão de Personal Trainers
+  const [manualTrainerData, setManualTrainerData] = useState({
+    nome: '',
+    email: '',
+    password: '',
+  });
 
   useEffect(() => {
     if (user?.role !== 'master') {
@@ -72,6 +70,48 @@ export default function MasterAdminDashboard() {
     loadData();
   };
 
+  const handleManualTrainerRegister = () => {
+    if (!manualTrainerData.nome || !manualTrainerData.email || !manualTrainerData.password) {
+      alert('Preencha todos os campos para o cadastro manual.');
+      return;
+    }
+
+    // Simulação de verificação de email duplicado
+    const authUsers = JSON.parse(localStorage.getItem('auth_users') || '[]');
+    if (authUsers.some((u: any) => u.email === manualTrainerData.email)) {
+      alert('Erro: Já existe um usuário cadastrado com este e-mail.');
+      return;
+    }
+
+    // 1. Criar o novo usuário (simulação de hash de senha)
+    const newUserId = `personal-${Date.now()}`;
+    const newUser = {
+      id: newUserId,
+      email: manualTrainerData.email,
+      password_hash: btoa(manualTrainerData.password), // Simulação de hash
+      role: 'personal',
+      status: 'ativo', // Master Admin já cadastra como ativo
+      createdAt: new Date().toISOString(),
+    };
+
+    // 2. Criar o perfil do Personal Trainer
+    const newTrainerProfile = {
+      user_id: newUserId,
+      nome: manualTrainerData.nome,
+      cref: 'N/A', // Adicionar campo CREF
+    };
+
+    // 3. Salvar no localStorage
+    localStorage.setItem('auth_users', JSON.stringify([...authUsers, newUser]));
+    const personalProfiles = JSON.parse(localStorage.getItem('personal_profiles') || '[]');
+    localStorage.setItem('personal_profiles', JSON.stringify([...personalProfiles, newTrainerProfile]));
+
+    // 4. Limpar formulário e atualizar lista de Personal Trainers
+    setManualTrainerData({ nome: '', email: '', password: '' });
+    loadData();
+    alert(`Personal Trainer ${manualTrainerData.nome} cadastrado com sucesso!`);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -82,10 +122,9 @@ export default function MasterAdminDashboard() {
     // Simulação de adição de exercício
     const newEx = {
       id: Date.now().toString(),
-      nome_exercicio: `Novo Exercício ${exercises.length + 1}`,
-      grupo_muscular: 'Outros',
-      link_video: '',
-      descricao: '',
+      nome: `Novo Exercício ${exercises.length + 1}`,
+      grupoMuscular: 'Outros',
+      createdAt: new Date().toISOString(),
     };
     const updatedExercises = [...exercises, newEx];
     saveExercises(updatedExercises);
@@ -114,6 +153,45 @@ export default function MasterAdminDashboard() {
   const renderPersonalManagement = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">Gestão de Personal Trainers</h2>
+
+      {/* Cadastro Manual de Personal Trainer */}
+      <Card className="p-6 bg-slate-700 space-y-4">
+        <h3 className="text-xl font-bold text-white">Cadastrar Personal Trainer Manualmente</h3>
+        <div className="space-y-2">
+          <Label htmlFor="nome-trainer" className="text-white">Nome Completo</Label>
+          <Input
+            id="nome-trainer"
+            type="text"
+            placeholder="Nome do Personal Trainer"
+            value={manualTrainerData.nome}
+            onChange={(e) => setManualTrainerData({ ...manualTrainerData, nome: e.target.value })}
+            className="bg-slate-800 border-slate-600 text-white"
+          />
+          <Label htmlFor="email-trainer" className="text-white">Email</Label>
+          <Input
+            id="email-trainer"
+            type="email"
+            placeholder="personal@email.com"
+            value={manualTrainerData.email}
+            onChange={(e) => setManualTrainerData({ ...manualTrainerData, email: e.target.value })}
+            className="bg-slate-800 border-slate-600 text-white"
+          />
+          <Label htmlFor="senha-trainer" className="text-white">Senha Inicial</Label>
+          <Input
+            id="senha-trainer"
+            type="password"
+            placeholder="Senha"
+            value={manualTrainerData.password}
+            onChange={(e) => setManualTrainerData({ ...manualTrainerData, password: e.target.value })}
+            className="bg-slate-800 border-slate-600 text-white"
+          />
+          <Button onClick={handleManualTrainerRegister} className="w-full bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" /> Cadastrar Personal Trainer
+          </Button>
+        </div>
+      </Card>
+
+      <h3 className="text-xl font-bold text-white mt-6">Aprovações Pendentes ({pendingPersonal.length})</h3>
       {pendingPersonal.length === 0 ? (
         <p className="text-slate-400">Nenhum Personal Trainer pendente de aprovação.</p>
       ) : (
@@ -158,8 +236,8 @@ export default function MasterAdminDashboard() {
         {exercises.map((ex) => (
           <Card key={ex.id} className="p-4 bg-slate-700 text-white flex justify-between items-center">
             <div>
-              <p className="font-semibold">{ex.nome_exercicio}</p>
-              <Badge variant="secondary" className="bg-slate-600 text-xs">{ex.grupo_muscular}</Badge>
+              <p className="font-semibold">{ex.nome}</p>
+              <Badge variant="secondary" className="bg-slate-600 text-xs">{ex.grupoMuscular}</Badge>
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" size="sm" className="text-slate-400 hover:bg-slate-600">

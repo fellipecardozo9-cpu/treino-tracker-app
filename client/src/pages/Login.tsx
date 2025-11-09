@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { Label } from '@/components/ui/label'; // Adicionado Label para consistência, embora não seja usado diretamente no código original, é bom ter.
 
 export default function Login() {
   const [, navigate] = useLocation();
@@ -74,7 +75,7 @@ export default function Login() {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full mb-2" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -83,6 +84,13 @@ export default function Login() {
             ) : (
               'Entrar'
             )}
+          </Button>
+          <Button 
+            variant="link" 
+            onClick={() => navigate('/forgot-password')} 
+            className="w-full text-sm text-muted-foreground hover:text-primary"
+          >
+            Esqueceu sua senha?
           </Button>
         </form>
 
@@ -103,4 +111,3 @@ export default function Login() {
     </div>
   );
 }
-
