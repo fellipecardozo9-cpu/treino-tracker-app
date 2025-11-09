@@ -37,7 +37,7 @@ export default function Home() {
 
   const currentWeek = getCurrentWeek();
   const currentDay = getCurrentDay();
-  const workoutCompleted = isWorkoutCompleted();
+  const workoutCompleted = isWorkoutCompleted(); // Forçar novo hash para cache
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
