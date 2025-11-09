@@ -32,6 +32,11 @@ export default function PersonalTrainerDashboard() {
   const [invitations, setInvitations] = useState<any[]>([]);
   const [emailToInvite, setEmailToInvite] = useState('');
   const [activeTab, setActiveTab] = useState('students');
+  const [manualStudentData, setManualStudentData] = useState({
+    nome: '',
+    email: '',
+    password: '',
+  });
 
   useEffect(() => {
     if (user?.role !== 'personal' || user?.status !== 'ativo') {
@@ -51,6 +56,13 @@ export default function PersonalTrainerDashboard() {
   const handleGenerateInvite = () => {
     if (!user || !emailToInvite) return;
 
+    // Simulação de verificação de email duplicado
+    const authUsers = JSON.parse(localStorage.getItem('auth_users') || '[]');
+    if (authUsers.some((u: any) => u.email === emailToInvite)) {
+      alert('Erro: Já existe um usuário cadastrado com este e-mail.');
+      return;
+    }
+
     const token = generateInviteToken();
     const newInvite = {
       id: Date.now().toString(),
@@ -65,11 +77,57 @@ export default function PersonalTrainerDashboard() {
     saveInvitations(updatedInvitations);
     setInvitations(updatedInvitations);
     setEmailToInvite('');
+    alert('Link de convite gerado e copiado para a área de transferência!');
   };
 
   const handleCopyLink = (link: string) => {
     navigator.clipboard.writeText(link);
     alert('Link de convite copiado!');
+  };
+
+  const handleManualStudentRegister = () => {
+    if (!user || !manualStudentData.nome || !manualStudentData.email || !manualStudentData.password) {
+      alert('Preencha todos os campos para o cadastro manual.');
+      return;
+    }
+
+    // Simulação de verificação de email duplicado
+    const authUsers = JSON.parse(localStorage.getItem('auth_users') || '[]');
+    if (authUsers.some((u: any) => u.email === manualStudentData.email)) {
+      alert('Erro: Já existe um usuário cadastrado com este e-mail.');
+      return;
+    }
+
+    // 1. Criar o novo usuário (simulação de hash de senha)
+    const newUserId = `aluno-${Date.now()}`;
+    const newUser = {
+      id: newUserId,
+      email: manualStudentData.email,
+      password_hash: btoa(manualStudentData.password), // Simulação de hash
+      role: 'aluno',
+      status: 'ativo',
+      createdAt: new Date().toISOString(),
+    };
+
+    // 2. Criar o perfil do aluno
+    const newStudentProfile = {
+      user_id: newUserId,
+      personal_id: user.id,
+      nome: manualStudentData.nome,
+      data_nascimento: 'N/A',
+      peso: 0,
+      altura: 0,
+    };
+
+    // 3. Salvar no localStorage
+    localStorage.setItem('auth_users', JSON.stringify([...authUsers, newUser]));
+    const studentProfiles = JSON.parse(localStorage.getItem('student_profiles') || '[]');
+    localStorage.setItem('student_profiles', JSON.stringify([...studentProfiles, newStudentProfile]));
+
+    // 4. Limpar formulário e atualizar lista de alunos
+    setManualStudentData({ nome: '', email: '', password: '' });
+    loadData();
+    alert(`Aluno ${manualStudentData.nome} cadastrado com sucesso!`);
   };
 
   const handleLogout = () => {
@@ -111,8 +169,48 @@ export default function PersonalTrainerDashboard() {
 
   const renderInviteManagement = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Gerar Convite para Aluno</h2>
+      <h2 className="text-2xl font-bold text-white">Gerenciamento de Alunos</h2>
+
+      {/* Cadastro Manual de Aluno */}
       <Card className="p-6 bg-slate-700 space-y-4">
+        <h3 className="text-xl font-bold text-white">Cadastrar Aluno Manualmente</h3>
+        <div className="space-y-2">
+          <Label htmlFor="nome-aluno" className="text-white">Nome Completo</Label>
+          <Input
+            id="nome-aluno"
+            type="text"
+            placeholder="Nome do Aluno"
+            value={manualStudentData.nome}
+            onChange={(e) => setManualStudentData({ ...manualStudentData, nome: e.target.value })}
+            className="bg-slate-800 border-slate-600 text-white"
+          />
+          <Label htmlFor="email-aluno" className="text-white">Email</Label>
+          <Input
+            id="email-aluno"
+            type="email"
+            placeholder="aluno@email.com"
+            value={manualStudentData.email}
+            onChange={(e) => setManualStudentData({ ...manualStudentData, email: e.target.value })}
+            className="bg-slate-800 border-slate-600 text-white"
+          />
+          <Label htmlFor="senha-aluno" className="text-white">Senha Inicial</Label>
+          <Input
+            id="senha-aluno"
+            type="password"
+            placeholder="Senha"
+            value={manualStudentData.password}
+            onChange={(e) => setManualStudentData({ ...manualStudentData, password: e.target.value })}
+            className="bg-slate-800 border-slate-600 text-white"
+          />
+          <Button onClick={handleManualStudentRegister} className="w-full bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" /> Cadastrar Aluno
+          </Button>
+        </div>
+      </Card>
+
+      {/* Geração de Convite por Link */}
+      <Card className="p-6 bg-slate-700 space-y-4">
+        <h3 className="text-xl font-bold text-white">Gerar Convite por Link</h3>
         <Label htmlFor="email-invite" className="text-white">Email do Aluno</Label>
         <div className="flex gap-2">
           <Input
@@ -169,7 +267,7 @@ export default function PersonalTrainerDashboard() {
             className={`w-full justify-start ${activeTab === 'invite' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:bg-slate-700'}`}
             onClick={() => setActiveTab('invite')}
           >
-            Gerar Convite
+            Gerenciar Alunos
           </Button>
           <Button 
             variant="ghost" 
