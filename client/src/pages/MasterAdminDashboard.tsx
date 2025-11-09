@@ -6,9 +6,16 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Clock, Trash2, Edit2, Plus, LogOut } from 'lucide-react';
-import { useLocation } from 'wouter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { useLocation } from 'wouter';
 
 // Simulação de funções de gestão
 const getPendingPersonal = (): User[] => {
@@ -31,13 +38,15 @@ const updatePersonalStatus = (userId: string, status: UserStatus) => {
   localStorage.setItem('auth_users', JSON.stringify(updatedUsers));
 };
 
+const MASTER_EXERCISES_KEY = 'master_exercises';
+
 const getExercises = () => {
-  // Agora usa a chave master_exercises
-  return JSON.parse(localStorage.getItem('master_exercises') || '[]');
+  // Usa a chave correta e a estrutura simplificada
+  return JSON.parse(localStorage.getItem(MASTER_EXERCISES_KEY) || '[]');
 };
 
 const saveExercises = (exercises: any) => {
-  localStorage.setItem('master_exercises', JSON.stringify(exercises));
+  localStorage.setItem(MASTER_EXERCISES_KEY, JSON.stringify(exercises));
 };
 
 export default function MasterAdminDashboard() {
@@ -50,6 +59,12 @@ export default function MasterAdminDashboard() {
     nome: '',
     email: '',
     password: '',
+  });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentExercise, setCurrentExercise] = useState<any | null>(null);
+  const [exerciseForm, setExerciseForm] = useState({
+    nome: '',
+    grupoMuscular: '',
   });
 
   useEffect(() => {
@@ -118,23 +133,63 @@ export default function MasterAdminDashboard() {
   };
 
   // Funções de gestão de exercícios
-  const handleAddExercise = () => {
-    // Simulação de adição de exercício
-    const newEx = {
-      id: Date.now().toString(),
-      nome: `Novo Exercício ${exercises.length + 1}`,
-      grupoMuscular: 'Outros',
-      createdAt: new Date().toISOString(),
-    };
-    const updatedExercises = [...exercises, newEx];
-    saveExercises(updatedExercises);
-    setExercises(updatedExercises);
+  const handleOpenDialog = (exercise: any | null = null) => {
+    setCurrentExercise(exercise);
+    if (exercise) {
+      setExerciseForm({
+        nome: exercise.nome,
+        grupoMuscular: exercise.grupoMuscular,
+      });
+    } else {
+      setExerciseForm({
+        nome: '',
+        grupoMuscular: '',
+      });
+    }
+    setIsDialogOpen(true);
   };
 
-  const handleDeleteExercise = (id: string) => {
+  const handleSaveExercise = () => {
+    if (!exerciseForm.nome || !exerciseForm.grupoMuscular) {
+      alert('Preencha todos os campos.');
+      return;
+    }
+
+    let updatedExercises = [...exercises];
+
+    if (currentExercise) {
+      // Edição
+      updatedExercises = updatedExercises.map(ex =>
+        ex.id === currentExercise.id
+          ? { ...ex, nome: exerciseForm.nome, grupoMuscular: exerciseForm.grupoMuscular }
+          : ex
+      );
+      alert(`Exercício ${exerciseForm.nome} atualizado com sucesso!`);
+    } else {
+      // Adição
+      const newEx = {
+        id: Date.now().toString(),
+        nome: exerciseForm.nome,
+        grupoMuscular: exerciseForm.grupoMuscular,
+        createdAt: new Date().toISOString(),
+      };
+      updatedExercises.push(newEx);
+      alert(`Exercício ${exerciseForm.nome} adicionado com sucesso!`);
+    }
+
+    saveExercises(updatedExercises);
+    setExercises(updatedExercises);
+    setIsDialogOpen(false);
+  };
+
+  const handleDeleteExercise = (id: string, nome: string) => {
+    if (!window.confirm(`Tem certeza que deseja excluir o exercício "${nome}"? Esta ação é irreversível.`)) {
+      return;
+    }
     const updatedExercises = exercises.filter(ex => ex.id !== id);
     saveExercises(updatedExercises);
     setExercises(updatedExercises);
+    alert(`Exercício "${nome}" excluído com sucesso.`);
   };
 
   const renderDashboard = () => (
@@ -229,7 +284,7 @@ export default function MasterAdminDashboard() {
   const renderExerciseManagement = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">Banco de Exercícios Central</h2>
-      <Button onClick={handleAddExercise} className="bg-blue-600 hover:bg-blue-700">
+      <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-700">
         <Plus className="w-4 h-4 mr-2" /> Adicionar Novo
       </Button>
       <div className="space-y-4">
@@ -240,16 +295,67 @@ export default function MasterAdminDashboard() {
               <Badge variant="secondary" className="bg-slate-600 text-xs">{ex.grupoMuscular}</Badge>
             </div>
             <div className="flex gap-2">
-              <Button variant="ghost" size="sm" className="text-slate-400 hover:bg-slate-600">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-slate-400 hover:bg-slate-600"
+                onClick={() => handleOpenDialog(ex)}
+              >
                 <Edit2 className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-red-400 hover:bg-red-900" onClick={() => handleDeleteExercise(ex.id)}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-red-400 hover:bg-red-900" 
+                onClick={() => handleDeleteExercise(ex.id, ex.nome)}
+              >
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           </Card>
         ))}
       </div>
+
+      {/* Diálogo de Edição/Adição */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-slate-800 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">{currentExercise ? 'Editar Exercício' : 'Adicionar Novo Exercício'}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="nome" className="text-right">
+                Nome
+              </Label>
+              <Input
+                id="nome"
+                value={exerciseForm.nome}
+                onChange={(e) => setExerciseForm({ ...exerciseForm, nome: e.target.value })}
+                className="col-span-3 bg-slate-700 border-slate-600 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="grupoMuscular" className="text-right">
+                Grupo Muscular
+              </Label>
+              <Input
+                id="grupoMuscular"
+                value={exerciseForm.grupoMuscular}
+                onChange={(e) => setExerciseForm({ ...exerciseForm, grupoMuscular: e.target.value })}
+                className="col-span-3 bg-slate-700 border-slate-600 text-white"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsDialogOpen(false)} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveExercise} className="bg-green-600 hover:bg-green-700">
+              {currentExercise ? 'Salvar Alterações' : 'Adicionar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 
