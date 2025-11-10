@@ -15,7 +15,8 @@ import WorkoutManager from "./pages/WorkoutManager";
 import MasterAdminDashboard from "./pages/MasterAdminDashboard";
 import WorkoutTracking from "./pages/WorkoutTracking";
 import PersonalTrainerDashboard from "./pages/PersonalTrainerDashboard";
-import AssignWorkout from "./pages/AssignWorkout"; // <-- NOVO IMPORT
+import AssignWorkout from "./pages/AssignWorkout";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function ProtectedRoute({ component: Component, requiredRole }: { component: React.ComponentType<any>, requiredRole?: 'master' | 'personal' | 'aluno' }) {
   const [, navigate] = useLocation();
@@ -61,9 +62,9 @@ function Router() {
   return (
     <Switch>
       <Route path={"/login"} component={Login} />
+      <Route path={"/forgot-password"} component={ForgotPassword} />
       <Route path={"/master/dashboard"} component={() => <ProtectedRoute component={MasterAdminDashboard} requiredRole="master" />} />
       <Route path={"/personal/dashboard"} component={() => <ProtectedRoute component={PersonalTrainerDashboard} requiredRole="personal" />} />
-      {/* Rota para atribuição de treino */}
       <Route path={"/personal/assign-workout/:studentId"} component={(props: any) => (
         <ProtectedRoute component={() => <AssignWorkout studentId={props.params.studentId} />} requiredRole="personal" />
       )} />

@@ -148,9 +148,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Inicializar banco de dados de usuários
   useEffect(() => {
     const users = localStorage.getItem(USERS_STORAGE_KEY);
+    // Se a chave não existir, inicializa com os usuários padrão (com hash de senha)
     if (!users) {
       const defaultUsers = [DEFAULT_MASTER, DEFAULT_PERSONAL_USER, DEFAULT_ALUNO_USER];
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(defaultUsers));
+    } else {
+      // Se a chave existir, mas os usuários não tiverem password_hash (versão antiga),
+      // forçamos a atualização para a nova estrutura.
+      const existingUsers = JSON.parse(users);
+      if (existingUsers.length > 0 && !existingUsers[0].password_hash) {
+        const defaultUsers = [DEFAULT_MASTER, DEFAULT_PERSONAL_USER, DEFAULT_ALUNO_USER];
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(defaultUsers));
+      }
     }
   }, []);
 
