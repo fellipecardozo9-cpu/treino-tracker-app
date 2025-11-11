@@ -3,7 +3,7 @@ import { Route, Switch } from 'wouter';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TooltipProvider } from './components/ui/tooltip';
-import { Toaster } from './components/ui/toaster';
+import { Toaster } from './components/ui/toaster'; // CORRIGIDO: Importação do Toaster
 import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -16,7 +16,7 @@ import MasterAdminDashboard from './pages/MasterAdminDashboard';
 import PersonalTrainerDashboard from './pages/PersonalTrainerDashboard';
 import AssignWorkout from './pages/AssignWorkout';
 import ForgotPassword from './pages/ForgotPassword';
-import WorkoutTracking from './pages/WorkoutTracking'; // Importação da nova página
+import WorkoutTracking from './pages/WorkoutTracking';
 
 function Router() {
   return (
@@ -30,7 +30,7 @@ function Router() {
       <Route path="/master/dashboard" component={() => <ProtectedRoute component={MasterAdminDashboard} />} />
       <Route path="/personal/dashboard" component={() => <ProtectedRoute component={PersonalTrainerDashboard} />} />
       <Route path="/personal/assign-workout/:studentId" component={({ params }) => <ProtectedRoute component={AssignWorkout} studentId={params.studentId} />} />
-      <Route path="/track/:workoutId" component={({ params }) => <ProtectedRoute component={WorkoutTracking} workoutId={params.workoutId} />} /> {/* Rota de Rastreamento de Treino */}
+      <Route path="/track/:workoutId" component={({ params }) => <ProtectedRoute component={WorkoutTracking} workoutId={params.workoutId} />} />
 
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
