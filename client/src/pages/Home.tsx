@@ -3,12 +3,20 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, BarChart3, Play, Edit2, User as UserIcon } from 'lucide-react';
+import { LogOut, BarChart3, Play, Edit2, User as UserIcon, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 export default function Home() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const [assignedWorkout, setAssignedWorkout] = useState<any>(null);
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null); // Para controlar qual bloco está aberto/ativo
+  const [weeklyProgress, setWeeklyProgress] = useState<Record<number, boolean>>({}); // 0=Dom, 1=Seg, ..., 6=Sáb
 
   useEffect(() => {
     if (user?.role === 'master') {
@@ -24,6 +32,25 @@ export default function Home() {
       const workouts = JSON.parse(localStorage.getItem('assigned_workouts') || '[]');
       const currentWorkout = workouts.find((w: any) => w.aluno_id === user.id);
       setAssignedWorkout(currentWorkout);
+
+      // Lógica para o progresso semanal
+      const completedWorkouts = JSON.parse(localStorage.getItem('completed_workouts') || '[]');
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay()); // Domingo da semana atual
+
+      const progress: Record<number, boolean> = {};
+      for (let i = 0; i < 7; i++) {
+        const day = new Date(startOfWeek);
+        day.setDate(startOfWeek.getDate() + i);
+        const dayString = day.toISOString().split('T')[0];
+        
+        const hasCompletedWorkout = completedWorkouts.some((cw: any) => 
+          cw.user_id === user.id && cw.date === dayString
+        );
+        progress[i] = hasCompletedWorkout;
+      }
+      setWeeklyProgress(progress);
     }
   }, [user, navigate]);
 
@@ -32,13 +59,13 @@ export default function Home() {
     navigate('/login');
   };
 
-  const handleStartWorkout = () => {
-    // Por enquanto, apenas um alerta. A lógica de rastreamento será implementada depois.
-    alert('Funcionalidade de iniciar treino em desenvolvimento.');
+  const handleStartWorkout = (blockId: string) => {
+    // Navega para a página de rastreamento, passando o ID do bloco de treino
+    navigate(`/track/${blockId}`);
   };
 
   const renderWorkout = () => {
-    if (!assignedWorkout || assignedWorkout.treino.length === 0) {
+    if (!assignedWorkout || assignedWorkout.blocos.length === 0) {
       return (
         <Card className="p-6 bg-slate-800 text-white text-center">
           <p className="text-xl font-semibold mb-2">Nenhum treino atribuído.</p>
@@ -51,31 +78,47 @@ export default function Home() {
       <Card className="p-6 bg-slate-800 space-y-4">
         <div className="flex justify-between items-center border-b border-slate-700 pb-2">
           <h2 className="text-2xl font-bold text-white">Seu Treino Atual</h2>
-          <Button onClick={handleStartWorkout} className="bg-green-600 hover:bg-green-700">
-            <Play className="w-4 h-4 mr-2" /> Iniciar Treino
-          </Button>
         </div>
 
         <p className="text-sm text-slate-400">Atribuído em: {new Date(assignedWorkout.data_atribuicao).toLocaleDateString()}</p>
+        <p className="text-sm text-slate-400">Ciclo de Treino: {assignedWorkout.ciclo_count || 0} / 8</p>
 
-        <div className="space-y-3">
-          {assignedWorkout.treino.map((ex: any, index: number) => (
-            <div key={index} className="p-3 bg-slate-700 rounded-md flex justify-between items-center">
-              <div>
-                <p className="font-semibold text-lg">{index + 1}. {ex.nome}</p>
-                <p className="text-sm text-slate-400">
-                  {ex.series} Séries de {ex.repeticoes} ({ex.carga})
-                </p>
-                {ex.observacoes && (
-                  <p className="text-xs text-yellow-400 mt-1">Obs: {ex.observacoes}</p>
-                )}
-              </div>
-              <Button variant="ghost" size="sm" className="text-blue-400 hover:bg-slate-600">
-                <Edit2 className="w-4 h-4" />
-              </Button>
-            </div>
+        <Accordion type="single" collapsible className="w-full space-y-2">
+          {assignedWorkout.blocos.map((block: any) => (
+            <AccordionItem key={block.id} value={block.id} className="border-slate-700 bg-slate-700 rounded-md">
+              <AccordionTrigger className="text-white hover:no-underline p-4">
+                <div className="flex justify-between items-center w-full pr-8">
+                  <span className="font-bold text-lg">{block.titulo} ({block.exercicios.length} exercícios)</span>
+                  <Button 
+                    onClick={(e) => {
+                      e.stopPropagation(); // Evita que o Accordion feche/abra
+                      handleStartWorkout(block.id);
+                    }} 
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Play className="w-4 h-4 mr-2" /> Iniciar Treino
+                  </Button>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-4 space-y-3 border-t border-slate-600">
+                {block.exercicios.map((ex: any, index: number) => (
+                  <div key={index} className="p-3 bg-slate-600 rounded-md flex justify-between items-center">
+                    <div>
+                      <p className="font-semibold text-lg">{index + 1}. {ex.nome}</p>
+                      <p className="text-sm text-slate-400">
+                        {ex.series} Séries de {ex.repeticoes} ({ex.carga})
+                      </p>
+                      {ex.observacoes && (
+                        <p className="text-xs text-yellow-400 mt-1">Obs: {ex.observacoes}</p>
+                      )}
+                    </div>
+                    {/* Botão de edição removido, pois o aluno não deve editar o treino */}
+                  </div>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </Card>
     );
   };
@@ -94,15 +137,7 @@ export default function Home() {
             <h1 className="text-xl font-bold text-white">Everstrong</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/workout-manager')}
-              className="text-white hover:bg-slate-700"
-              title="Gerenciar treinos"
-            >
-              {/* Removido Settings, pois o aluno não deve gerenciar treinos */}
-            </Button>
+	              {/* Removido o botão de Gerenciar Treinos para o Aluno */}
             <Button
               variant="ghost"
               size="sm"
@@ -133,6 +168,23 @@ export default function Home() {
             Meu Perfil e Estatísticas
           </Button>
         </div>
+
+        {/* Indicador de Progresso Semanal */}
+        <Card className="p-4 bg-slate-800 mb-8">
+          <h3 className="text-lg font-bold text-white mb-3">Progresso Semanal</h3>
+          <div className="flex justify-between">
+            {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day, index) => (
+              <div key={day} className="flex flex-col items-center">
+                <p className="text-sm text-slate-400 mb-1">{day}</p>
+                {weeklyProgress[index] ? (
+                  <CheckCircle className="w-6 h-6 text-green-500" />
+                ) : (
+                  <XCircle className="w-6 h-6 text-red-500" />
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
 
         {renderWorkout()}
       </div>
