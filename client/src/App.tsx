@@ -3,35 +3,43 @@ import { Route, Switch } from 'wouter';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TooltipProvider } from './components/ui/tooltip';
-import { Toaster } from './components/ui/toaster'; // CORRIGIDO: Importação do Toaster
+import { Toaster } from './components/ui/toaster';
 import ErrorBoundary from './components/ErrorBoundary';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute'; // Importação corrigida
 
 // Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import MasterAdminDashboard from './pages/MasterAdminDashboard';
 import PersonalTrainerDashboard from './pages/PersonalTrainerDashboard';
 import AssignWorkout from './pages/AssignWorkout';
 import ForgotPassword from './pages/ForgotPassword';
 import WorkoutTracking from './pages/WorkoutTracking';
+import Statistics from './pages/Statistics';
+import ExerciseDetail from './pages/ExerciseDetail';
+import ExerciseManager from './pages/ExerciseManager';
+import WorkoutManager from './pages/WorkoutManager';
+import WorkoutDay from './pages/WorkoutDay';
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
       <Route path="/forgot-password" component={ForgotPassword} />
       
       {/* Rotas Protegidas */}
-      <Route path="/master/dashboard" component={() => <ProtectedRoute component={MasterAdminDashboard} />} />
-      <Route path="/personal/dashboard" component={() => <ProtectedRoute component={PersonalTrainerDashboard} />} />
-      <Route path="/personal/assign-workout/:studentId" component={({ params }) => <ProtectedRoute component={AssignWorkout} studentId={params.studentId} />} />
+      <Route path="/master/dashboard" component={() => <ProtectedRoute component={MasterAdminDashboard} requiredRole="master" />} />
+      <Route path="/personal/dashboard" component={() => <ProtectedRoute component={PersonalTrainerDashboard} requiredRole="personal" />} />
+      <Route path="/personal/assign-workout/:studentId" component={({ params }) => <ProtectedRoute component={AssignWorkout} studentId={params.studentId} requiredRole="personal" />} />
       <Route path="/track/:workoutId" component={({ params }) => <ProtectedRoute component={WorkoutTracking} workoutId={params.workoutId} />} />
-
+      <Route path="/" component={() => <ProtectedRoute component={Home} />} />
+      <Route path="/statistics" component={() => <ProtectedRoute component={Statistics} />} />
+      <Route path="/exercise/:name" component={({ params }) => <ProtectedRoute component={ExerciseDetail} exerciseName={decodeURIComponent(params.name)} />} />
+      <Route path="/exercise-manager" component={() => <ProtectedRoute component={ExerciseManager} />} />
+      <Route path="/workout-manager" component={() => <ProtectedRoute component={WorkoutManager} />} />
+      <Route path="/workout/:day/:week" component={({ params }) => <ProtectedRoute component={WorkoutDay} day={params.day} week={parseInt(params.week)} />} />
+      <Route path="/workout/:dayIndex" component={({ params }) => <ProtectedRoute component={WorkoutDay} dayIndex={parseInt(params.dayIndex)} />} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
